@@ -1,10 +1,36 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Badge } from "@/components/ui/Badge";
 
-const previewColumns = [
-  { title: "To Do", cards: ["...", "..."] },
-  { title: "In Progress", cards: ["..."] },
-  { title: "Done", cards: ["...", "..."] },
+interface PreviewCard {
+  title: string;
+  label: { name: string; color: string };
+}
+
+/** Example cards for the board picture on the welcome page (fixed, not saved data). */
+const previewColumns: { title: string; done?: boolean; cards: PreviewCard[] }[] = [
+  {
+    title: "To Do",
+    cards: [
+      { title: "Write the onboarding guide", label: { name: "Docs", color: "#475569" } },
+      { title: "Plan the launch email", label: { name: "Launch", color: "#be185d" } },
+    ],
+  },
+  {
+    title: "In Progress",
+    cards: [
+      { title: "Design the pricing page", label: { name: "Design", color: "#a86b40" } },
+      { title: "Fix the login timeout", label: { name: "Bug", color: "#b42318" } },
+    ],
+  },
+  {
+    title: "Done",
+    done: true,
+    cards: [
+      { title: "Set up the project", label: { name: "Feature", color: "#3f6212" } },
+      { title: "Pick the brand colours", label: { name: "Design", color: "#a86b40" } },
+    ],
+  },
 ];
 
 export default function HomePage() {
@@ -84,22 +110,31 @@ export default function HomePage() {
             key={column.title}
             className="rounded-2xl border border-border bg-surface/70 p-3 shadow-sm backdrop-blur"
           >
-            <p className="mb-3 text-xs font-semibold text-muted">
+            <p className="mb-3 flex items-center justify-between text-xs font-semibold text-muted">
               {column.title}
+              <span className="rounded-full bg-surface-muted px-1.5 text-[11px]">
+                {column.cards.length}
+              </span>
             </p>
             <div className="flex flex-col gap-2">
               {column.cards.map((card, cardIndex) => (
                 <div
-                  // The card text can repeat (e.g. "..."), so the key uses the
-                  // card's position instead. This list never changes order.
-                  key={`${column.title}-${cardIndex}`}
+                  key={card.title}
                   style={{
                     animationDelay: `${600 + columnIndex * 150 + cardIndex * 100}ms`,
                   }}
-                  className="animate-fade-up rounded-xl border border-border bg-surface p-2.5 text-left text-xs shadow-sm transition-transform duration-300 hover:-translate-y-0.5"
+                  className="flex animate-fade-up flex-col items-start gap-1.5 rounded-xl border border-border bg-surface p-2.5 text-left text-xs shadow-sm transition-transform duration-300 hover:-translate-y-0.5"
                 >
-                  <span className="mb-1.5 block h-1 w-8 rounded-full bg-brand-gradient" />
-                  {card}
+                  <Badge color={card.label.color} className="max-w-full truncate">
+                    {card.label.name}
+                  </Badge>
+                  <span
+                    className={
+                      column.done ? "text-muted line-through" : "font-medium text-foreground"
+                    }
+                  >
+                    {card.title}
+                  </span>
                 </div>
               ))}
             </div>

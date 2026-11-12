@@ -42,7 +42,7 @@ own browser (IndexedDB), so your projects are still there after a refresh or a r
 **Settings**
 - Project settings: name and description, labels (name and colour), members and roles,
   archive or delete
-- App settings: light, dark or system theme, profile, and "Reset to demo data"
+- App settings: light, dark or system theme, profile, and "Delete all data"
 
 **Also**
 - Brown "coffee" theme with light and dark mode
@@ -74,8 +74,9 @@ npm run dev
 
 Then open <http://localhost:3000> and click **Get started**.
 
-The first time the app opens it loads three sample projects, so the screens are not empty.
-You can bring them back at any time from **Settings → Reset to demo data**.
+The app starts empty. Click **Create your first project** to get a board with the lists
+_To Do, In Progress, Review_ and _Done_. To start again from scratch, use
+**Settings → Delete all data**.
 
 ### Scripts
 
@@ -117,8 +118,8 @@ You can bring them back at any time from **Settings → Reset to demo data**.
 - Data lives in **one browser on one device**. Clearing site data deletes it, and it is
   not shared with other people or devices.
 - No real-time collaboration, notifications or file attachments.
-- If the browser blocks IndexedDB (some private windows), the app still opens with the sample
-  data, but changes are lost when the tab closes.
+- If the browser blocks IndexedDB (some private windows), the app still works, but changes
+  are lost when the tab closes.
 
 ## More
 

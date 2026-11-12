@@ -28,8 +28,3 @@ export const indexedDBStorage: StateStorage = {
     await del(name);
   },
 };
-
-/** Has this browser ever saved Taskly data before? */
-export async function hasSavedData(): Promise<boolean> {
-  return (await get(STORAGE_KEY)) !== undefined;
-}

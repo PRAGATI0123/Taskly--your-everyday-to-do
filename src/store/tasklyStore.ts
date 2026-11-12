@@ -27,7 +27,6 @@ import {
   validateProjectDescription,
   validateProjectName,
 } from "@/lib/projects";
-import { createSampleData } from "@/lib/sample-data";
 import { APP_USER } from "@/lib/user";
 import {
   addActivity,
@@ -171,7 +170,7 @@ const ARCHIVED = "This project is archived. Restore it to make changes.";
 
 /**
  * Bump this number whenever the saved data's shape changes (see `migrate`).
- *   1 → login with a demo account + extra sample people
+ *   1 → login with a demo account + extra people
  *   2 → one built-in user, no login, no extra people
  */
 const STORAGE_VERSION = 2;
@@ -718,8 +717,8 @@ export const useTasklyStore = create<TasklyStore>()(
       migrate: (persisted, version): TasklyState => {
         if (version < 2) {
           // Version 1 data belongs to the old demo account and people who no
-          // longer exist, so start again with fresh sample data.
-          return { ...createSampleData(), currentUserId: APP_USER.id };
+          // longer exist, so start again with an empty app.
+          return { ...emptyState, projects: {}, tasks: {} };
         }
         return persisted as TasklyState;
       },

@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Monitor, Moon, RotateCcw, Sun } from "lucide-react";
+import { Check, Monitor, Moon, Sun, Trash2 } from "lucide-react";
 import { SettingsSection } from "@/components/project/settings/SettingsSection";
 import { Avatar, Button, ConfirmDialog } from "@/components/ui";
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/cn";
 import type { ThemePreference } from "@/lib/theme";
 import { useCurrentUser } from "@/store/selectors";
-import { resetToSampleData } from "@/store/startup";
+import { deleteAllData } from "@/store/startup";
 import { useTasklyStore } from "@/store/tasklyStore";
 
 const THEMES: { value: ThemePreference; label: string; hint: string; icon: typeof Sun }[] = [
@@ -120,7 +120,7 @@ function DataSettings() {
   const router = useRouter();
   const projects = useTasklyStore((state) => state.projects);
   const tasks = useTasklyStore((state) => state.tasks);
-  const [confirmingReset, setConfirmingReset] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const projectCount = Object.keys(projects).length;
   const taskCount = Object.keys(tasks).length;
@@ -143,37 +143,38 @@ function DataSettings() {
 
         <div className="flex flex-wrap items-center gap-3 p-4">
           <div className="min-w-48 flex-1">
-            <p className="text-sm font-semibold text-danger">Reset to demo data</p>
+            <p className="text-sm font-semibold text-danger">Delete all data</p>
             <p className="text-xs text-muted">
-              Deletes everything you made and loads the sample projects again.
+              Deletes every project and task, so you can start again from scratch.
             </p>
           </div>
           <Button
             variant="danger"
             size="sm"
-            icon={<RotateCcw className="size-4" />}
-            onClick={() => setConfirmingReset(true)}
+            icon={<Trash2 className="size-4" />}
+            onClick={() => setConfirmingDelete(true)}
+            disabled={projectCount === 0}
           >
-            Reset
+            Delete all
           </Button>
         </div>
       </div>
 
       <ConfirmDialog
-        open={confirmingReset}
-        title="Reset to demo data?"
-        confirmLabel="Reset everything"
+        open={confirmingDelete}
+        title="Delete all data?"
+        confirmLabel="Delete everything"
         danger
         onConfirm={() => {
-          resetToSampleData();
-          setConfirmingReset(false);
+          deleteAllData();
+          setConfirmingDelete(false);
           router.push("/projects");
         }}
-        onCancel={() => setConfirmingReset(false)}
+        onCancel={() => setConfirmingDelete(false)}
       >
         <p>
-          All {projectCount} projects and {taskCount} tasks will be replaced by the sample
-          data. This can&apos;t be undone.
+          All {projectCount} {projectCount === 1 ? "project" : "projects"} and {taskCount}{" "}
+          {taskCount === 1 ? "task" : "tasks"} will be deleted. This can&apos;t be undone.
         </p>
       </ConfirmDialog>
     </SettingsSection>

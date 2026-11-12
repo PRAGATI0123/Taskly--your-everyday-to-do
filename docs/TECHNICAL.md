@@ -83,8 +83,8 @@ message instead of crashing.
 **Saving**: Zustand's `persist` middleware copies the data into **IndexedDB** after every
 change (`src/store/storage.ts`, using `idb-keyval`). Because the server has no IndexedDB,
 loading is started in the browser (`StoreProvider` → `startStore()`), and `StoreGate` shows a
-spinner until the data is ready. On the very first visit the store is filled with sample data
-(`lib/sample-data.ts`). The saved data has a version number, so older saved data can be
+spinner until the data is ready. A first-time visitor has nothing saved, so they start with
+no projects. The saved data has a version number, so older saved data can be
 upgraded (`migrate`).
 
 ## 5. Drag and drop
@@ -136,5 +136,5 @@ saved theme **before** the page is drawn, so there is no white flash. The choice
 | `lib/filters.test.ts` | Filters in the address, matching, sorting, dropping into a filtered list |
 | `lib/table.test.ts` | List view sorting |
 | `lib/tasks.test.ts` | Due-date status, dates, building tasks, activity messages |
-| `lib/projects.test.ts` | Building projects, validators, stats, permissions, sample data |
+| `lib/projects.test.ts` | Building projects, validators, stats, permissions |
 | `store/tasklyStore.test.ts` | Store actions end to end (IndexedDB replaced by an in-memory box) |

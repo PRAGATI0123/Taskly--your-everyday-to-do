@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { APP_USER } from "@/lib/user";
+import { deleteAllData } from "./startup";
 import { emptyState, useTasklyStore } from "./tasklyStore";
 
 // Tests run outside a browser, so there is no IndexedDB. A simple in-memory
@@ -58,6 +59,15 @@ describe("projects", () => {
     expect(store().deleteProject(projectId).ok).toBe(true);
     expect(store().projects).toEqual({});
     expect(store().tasks).toEqual({});
+  });
+
+  it("'Delete all data' leaves an empty app with the built-in user", () => {
+    const { projectId, todo } = newProject();
+    newTask(projectId, todo);
+    deleteAllData();
+    expect(store().projects).toEqual({});
+    expect(store().tasks).toEqual({});
+    expect(store().members).toEqual([APP_USER]);
   });
 
   it("never lets the last owner leave", () => {

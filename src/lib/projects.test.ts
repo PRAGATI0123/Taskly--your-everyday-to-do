@@ -8,7 +8,6 @@ import {
   validateLabelName,
   validateProjectName,
 } from "./projects";
-import { createSampleData } from "./sample-data";
 
 describe("buildProject", () => {
   const project = buildProject(
@@ -66,24 +65,5 @@ describe("permissions", () => {
     expect([canManageProject("member"), canManageProject("admin")]).toEqual([false, true]);
     expect([canDeleteProject("admin"), canDeleteProject("owner")]).toEqual([false, true]);
     expect(canEditTasks(null)).toBe(false);
-  });
-});
-
-describe("sample data", () => {
-  const data = createSampleData(new Date("2026-06-10T12:00:00Z"));
-
-  it("has 3 projects whose cards all point to real tasks", () => {
-    const projects = Object.values(data.projects);
-    expect(projects).toHaveLength(3);
-    for (const project of projects) {
-      for (const id of project.columns.flatMap((c) => c.taskIds)) {
-        expect(data.tasks[id]?.projectId).toBe(project.id);
-      }
-    }
-  });
-
-  it("gives every task its own creation time, so 'Newest first' works", () => {
-    const times = Object.values(data.tasks).map((t) => t.createdAt);
-    expect(new Set(times).size).toBe(times.length);
   });
 });
