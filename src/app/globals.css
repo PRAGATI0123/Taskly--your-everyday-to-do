@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+/*
+  `dark:` classes switch on when <html data-theme="dark">.
+  (The theme script in the page head sets this before anything is drawn.)
+*/
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+  Design tokens: the app's colour palette in one place.
+  Theme: warm coffee & caramel. Components use names like `bg-surface` or
+  `text-muted` instead of raw colours, so dark mode only swaps these values.
+*/
+:root {
+  color-scheme: light; /* native parts (scrollbars, date pickers) go light */
+
+  --background: #faf6f0; /* cream page background */
+  --foreground: #2b1d14; /* espresso text */
+  --surface: #fffdf9; /* cards, columns, modals */
+  --surface-muted: #f3ebe1; /* hover areas, inputs */
+  --border: #e6d8c7; /* soft latte lines */
+  --muted: #7a6352; /* secondary text */
+  --primary: #8b5a3c; /* main brand brown */
+  --primary-foreground: #fffaf3; /* text on top of solid primary */
+  --accent: #c8925a; /* caramel highlight */
+  --danger: #b42318; /* delete buttons, errors */
+  --success: #3f6212; /* done, good news */
+  --warning: #b45309; /* due soon, high priority */
+
+  /* Brand gradient for buttons: caramel -> mocha -> chocolate */
+  --gradient-from: #a86b40;
+  --gradient-via: #7d4f33;
+  --gradient-to: #4e3120;
+  --on-gradient: #fffaf3; /* text on top of the gradient */
+
+  /* Gradient for big headline text */
+  --text-gradient-from: #a86b40;
+  --text-gradient-via: #7d4f33;
+  --text-gradient-to: #4e3120;
+
+  /* Soft glows used for decoration only */
+  --glow-1: #e9c9a0;
+  --glow-2: #d4a373;
+}
+
+/* Dark roast: the same names, darker values. */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #16100c; /* espresso */
+  --foreground: #f3e9df; /* steamed milk */
+  --surface: #211812;
+  --surface-muted: #2c2018;
+  --border: #3e2f25;
+  --muted: #b8a291;
+  --primary: #d9a877; /* lighter tan, so it shows on dark */
+  --primary-foreground: #1c130d;
+  --accent: #e0b07e;
+  --danger: #f87171;
+  --success: #a3c46b;
+  --warning: #f2a65a;
+
+  --gradient-from: #a86b40;
+  --gradient-via: #8b5a3c;
+  --gradient-to: #6b4329;
+  --on-gradient: #fffaf3;
+
+  --text-gradient-from: #f0c99a;
+  --text-gradient-via: #d9a877;
+  --text-gradient-to: #b98252;
+
+  --glow-1: #6b4329;
+  --glow-2: #4e3120;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-on-gradient: var(--on-gradient);
+  --color-glow-1: var(--glow-1);
+  --color-glow-2: var(--glow-2);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
+}
+
+/* Animations: use them as `animate-fade-up`, `animate-float`, etc. */
+@theme {
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-float: float 9s ease-in-out infinite;
+  --animate-gradient: gradient-shift 8s ease infinite;
+  --animate-shimmer: shimmer 2.8s linear infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(24px, -28px) scale(1.06);
+    }
+  }
+
+  @keyframes gradient-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      transform: translateX(-120%) skewX(-20deg);
+    }
+    to {
+      transform: translateX(220%) skewX(-20deg);
+    }
+  }
+}
+
+/* Reusable gradient helpers */
+@utility bg-brand-gradient {
+  background-image: linear-gradient(
+    120deg,
+    var(--gradient-from),
+    var(--gradient-via),
+    var(--gradient-to),
+    var(--gradient-from)
+  );
+  background-size: 250% 250%;
+}
+
+@utility text-brand-gradient {
+  background-image: linear-gradient(
+    120deg,
+    var(--text-gradient-from),
+    var(--text-gradient-via),
+    var(--text-gradient-to),
+    var(--text-gradient-from)
+  );
+  background-size: 250% 250%;
+  background-clip: text;
+  color: transparent;
+}
+
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  /* A soft warm glow behind every page */
+  background-image:
+    radial-gradient(
+      60rem 40rem at 10% -10%,
+      color-mix(in srgb, var(--glow-1) 45%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50rem 35rem at 110% 110%,
+      color-mix(in srgb, var(--glow-2) 30%, transparent),
+      transparent 70%
+    );
+  background-attachment: fixed;
+}
+
+/*
+  A badge in any colour (e.g. a label's colour), set through --badge-color.
+  In dark mode the text is mixed with white so it stays readable.
+*/
+.badge-custom {
+  color: var(--badge-color);
+  background-color: color-mix(in srgb, var(--badge-color) 12%, transparent);
+  border-color: color-mix(in srgb, var(--badge-color) 30%, transparent);
+}
+[data-theme="dark"] .badge-custom {
+  color: color-mix(in srgb, var(--badge-color) 55%, white);
+  background-color: color-mix(in srgb, var(--badge-color) 22%, transparent);
+  border-color: color-mix(in srgb, var(--badge-color) 45%, transparent);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* Respect people who turn off animations in their system settings */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
