@@ -149,7 +149,9 @@ export function SortableTaskCard({
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     listeners?.onKeyDown?.(event); // Space picks the card up (dnd-kit)
-    if (event.key === "Enter" && !event.defaultPrevented) router.push(href); // Enter opens it
+    // Enter opens the card, but NOT while it is being moved with the keyboard
+    // (that would open a pop-up in the middle of the move).
+    if (event.key === "Enter" && !isDragging && !event.defaultPrevented) router.push(href);
   }
 
   return (

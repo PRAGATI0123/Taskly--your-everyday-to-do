@@ -42,11 +42,14 @@ own browser (IndexedDB), so your projects are still there after a refresh or a r
 **Settings**
 - Project settings: name and description, labels (name and colour), members and roles,
   archive or delete
-- App settings: light, dark or system theme, profile, and "Delete all data"
+- App settings: light, dark or system theme, your name, and "Delete all data"
 
 **Also**
 - Brown "coffee" theme with light and dark mode
 - Responsive layout for phone, tablet and desktop
+- Several open tabs stay in sync: a change in one tab shows up in the others
+- Link previews (WhatsApp, LinkedIn, Slack…) show a Taskly picture, and phones can
+  "Add to Home Screen"
 - Accessible: real buttons and form fields, keyboard support, screen reader announcements
   for drag and drop
 
@@ -104,8 +107,9 @@ _To Do, In Progress, Review_ and _Done_. To start again from scratch, use
 
 ## Assumptions
 
-- **One built-in user.** There is no backend, so there is no sign-up or login. The app has one
-  user, set in `src/lib/user.ts`, who owns every project.
+- **One user per browser.** There is no backend, so there is no sign-up or login. Each browser
+  has one user who owns every project. The starting name is set in `src/lib/user.ts`, and
+  anyone can change their own name in **Settings**.
 - **The last list is "done".** Progress and overdue counts use this rule. A new list is
   always added _before_ the last one, so "Done" stays last.
 - **Due dates are calendar days.** A task is "due soon" if it is due today or within the next
@@ -118,8 +122,9 @@ _To Do, In Progress, Review_ and _Done_. To start again from scratch, use
 - Data lives in **one browser on one device**. Clearing site data deletes it, and it is
   not shared with other people or devices.
 - No real-time collaboration, notifications or file attachments.
-- If the browser blocks IndexedDB (some private windows), the app still works, but changes
-  are lost when the tab closes.
+- If the saved data can't be opened (for example the browser blocks IndexedDB), the app shows
+  a warning and stops saving, so the old data is never overwritten. Changes made then are
+  lost when the tab closes.
 
 ## More
 

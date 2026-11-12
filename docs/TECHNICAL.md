@@ -84,7 +84,23 @@ message instead of crashing.
 change (`src/store/storage.ts`, using `idb-keyval`). Because the server has no IndexedDB,
 loading is started in the browser (`StoreProvider` → `startStore()`), and `StoreGate` shows a
 spinner until the data is ready. A first-time visitor has nothing saved, so they start with
-no projects. The saved data has a version number, so older saved data can be
+no projects.
+
+Three safety nets (`store/startup.ts`, `store/storage.ts`):
+
+- **Bad data is never overwritten.** Before loading, the app checks that the saved data can be
+  read. If it can't, saving is switched off ("locked") and a warning bar is shown, so the old
+  data stays safe.
+- **Open tabs stay in sync.** After every save, the tab sends a message on a
+  `BroadcastChannel`. Other open tabs hear it and reload the newest data, so one tab never
+  overwrites another tab's work with an old copy.
+- **Failed saves are shown.** If a save fails (for example the disk is full), a warning bar
+  tells the user.
+
+Ids from the address are looked up with `lib/lookup.ts` (`Object.hasOwn`), so odd addresses
+like `/projects/constructor` show "not found" instead of crashing.
+
+The saved data has a version number, so older saved data can be
 upgraded (`migrate`).
 
 ## 5. Drag and drop
@@ -138,3 +154,11 @@ saved theme **before** the page is drawn, so there is no white flash. The choice
 | `lib/tasks.test.ts` | Due-date status, dates, building tasks, activity messages |
 | `lib/projects.test.ts` | Building projects, validators, stats, permissions |
 | `store/tasklyStore.test.ts` | Store actions end to end (IndexedDB replaced by an in-memory box) |
+| `store/startup.test.ts` | First visit, loading saved data, and never overwriting unreadable data |
+
+## 10. Sharing and SEO
+
+The root layout sets the page title, description, Open Graph and Twitter info, and the phone
+browser-bar colour. `app/opengraph-image.tsx` draws the link-preview picture at build time,
+and `app/manifest.ts` lets phones add Taskly to the home screen. On Vercel the site address
+comes from the `VERCEL_PROJECT_PRODUCTION_URL` environment variable automatically.

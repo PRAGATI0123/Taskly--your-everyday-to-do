@@ -14,6 +14,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import * as board from "@/lib/board";
 import { createId, nowISO } from "@/lib/id";
+import { lookup } from "@/lib/lookup";
 import {
   canDeleteProject,
   canEditTasks,
@@ -27,7 +28,7 @@ import {
   validateProjectDescription,
   validateProjectName,
 } from "@/lib/projects";
-import { APP_USER } from "@/lib/user";
+import { APP_USER, validateUserName } from "@/lib/user";
 import {
   addActivity,
   buildTask,
@@ -80,6 +81,9 @@ export interface TasklyState extends TasklyData {
 export interface TasklyActions {
   // Whole data
   loadData: (data: TasklyData) => void;
+
+  // The person using the app
+  updateMyName: (name: string) => ActionResult;
 
   // Projects
   createProject: (input: {
@@ -151,9 +155,16 @@ export const emptyState: TasklyState = {
   currentUserId: APP_USER.id,
 };
 
-/** Makes sure the built-in user is always on the team list (with its latest name). */
+/**
+ * Makes sure the built-in user is always first on the team list, keeping the
+ * name they chose in Settings (if any).
+ */
 function withAppUser(members: TasklyData["members"]): TasklyData["members"] {
-  return [APP_USER, ...members.filter((m) => m.id !== APP_USER.id)];
+  const saved = members.find((m) => m.id === APP_USER.id);
+  return [
+    { ...APP_USER, name: saved?.name ?? APP_USER.name },
+    ...members.filter((m) => m.id !== APP_USER.id),
+  ];
 }
 
 const NOT_LOGGED_IN = "No user is set up.";
@@ -206,7 +217,7 @@ export const useTasklyStore = create<TasklyStore>()(
 
       /** Finds a project and checks that I may manage it. */
       function projectIManage(projectId: ID): ActionResult<Project> {
-        const project = get().projects[projectId];
+        const project = lookup(get().projects, projectId);
         if (!get().currentUserId) return fail(NOT_LOGGED_IN);
         if (!project) return fail(NO_PROJECT);
         if (!canManageProject(myRole(project))) return fail(CANT_MANAGE);
@@ -218,10 +229,10 @@ export const useTasklyStore = create<TasklyStore>()(
         taskId: ID,
       ): ActionResult<{ task: Task; project: Project }> {
         const { currentUserId, tasks, projects } = get();
-        const task = tasks[taskId];
+        const task = lookup(tasks, taskId);
         if (!currentUserId) return fail(NOT_LOGGED_IN);
         if (!task) return fail(NO_TASK);
-        const project = projects[task.projectId];
+        const project = lookup(projects, task.projectId);
         if (!project) return fail(NO_PROJECT);
         if (!canEditTasks(myRole(project))) return fail(CANT_EDIT);
         if (project.archived) return fail(ARCHIVED);
@@ -246,6 +257,19 @@ export const useTasklyStore = create<TasklyStore>()(
             members: withAppUser(data.members),
             currentUserId: APP_USER.id,
           }),
+
+        // ----- The person using the app ---------------------------------------
+
+        updateMyName: (name) => {
+          const error = validateUserName(name);
+          if (error) return fail(error);
+          set((state) => ({
+            members: state.members.map((m) =>
+              m.id === APP_USER.id ? { ...m, name: name.trim() } : m,
+            ),
+          }));
+          return ok();
+        },
 
         // ----- Projects -------------------------------------------------------
 
@@ -295,7 +319,7 @@ export const useTasklyStore = create<TasklyStore>()(
         },
 
         deleteProject: (projectId) => {
-          const project = get().projects[projectId];
+          const project = lookup(get().projects, projectId);
           if (!get().currentUserId) return fail(NOT_LOGGED_IN);
           if (!project) return fail(NO_PROJECT);
           if (!canDeleteProject(myRole(project))) {
@@ -509,7 +533,7 @@ export const useTasklyStore = create<TasklyStore>()(
 
         createTask: (projectId, columnId, input) => {
           const { currentUserId, projects } = get();
-          const project = projects[projectId];
+          const project = lookup(projects, projectId);
           if (!currentUserId) return fail(NOT_LOGGED_IN);
           if (!project) return fail(NO_PROJECT);
           if (!canEditTasks(myRole(project))) return fail(CANT_EDIT);

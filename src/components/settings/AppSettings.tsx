@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Monitor, Moon, Sun, Trash2 } from "lucide-react";
 import { SettingsSection } from "@/components/project/settings/SettingsSection";
-import { Avatar, Button, ConfirmDialog } from "@/components/ui";
+import { Avatar, Button, ConfirmDialog, Input } from "@/components/ui";
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/cn";
 import type { ThemePreference } from "@/lib/theme";
+import { USER_NAME_MAX_LENGTH } from "@/lib/user";
 import { useCurrentUser } from "@/store/selectors";
 import { deleteAllData } from "@/store/startup";
 import { useTasklyStore } from "@/store/tasklyStore";
@@ -96,21 +97,64 @@ function AppearanceSettings() {
   );
 }
 
-/** Who is using Taskly. */
+/** Who is using Taskly — and a box to change your name. */
 function ProfileSettings() {
   const user = useCurrentUser();
+  const updateMyName = useTasklyStore((state) => state.updateMyName);
+  // Only what you TYPE is kept here; until then the box shows the saved name.
+  const [draft, setDraft] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   if (!user) return null;
 
+  const name = draft ?? user.name;
+  const changed = name.trim() !== user.name;
+
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    const result = updateMyName(name);
+    if (!result.ok) return setError(result.error);
+    setDraft(null);
+    setSaved(true);
+  }
+
   return (
-    <SettingsSection title="Profile" description="Taskly has one built-in user — you.">
-      <div className="flex items-center gap-4 rounded-xl border border-border p-4">
-        <Avatar name={user.name} color={user.color} size="lg" />
-        <div>
-          <p className="font-semibold">{user.name}</p>
-          <p className="text-sm text-muted">Owner of every project</p>
+    <SettingsSection
+      title="Profile"
+      description="Your name is shown on your projects, cards and comments. It is saved in this browser."
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="sm:pt-6">
+          <Avatar name={name.trim() || user.name} color={user.color} size="lg" />
         </div>
+        <form onSubmit={handleSubmit} noValidate className="flex flex-1 flex-col gap-3">
+          <Input
+            label="Your name"
+            required
+            autoComplete="name"
+            value={name}
+            onChange={(event) => {
+              setDraft(event.target.value);
+              setError(null);
+              setSaved(false);
+            }}
+            error={error}
+            hint={`${name.trim().length}/${USER_NAME_MAX_LENGTH}`}
+          />
+          <div className="flex items-center gap-3">
+            <Button type="submit" disabled={!changed}>
+              Save name
+            </Button>
+            <span role="status" className="flex items-center gap-1 text-sm text-success">
+              {saved && !changed && (
+                <>
+                  <Check className="size-4" aria-hidden="true" /> Saved
+                </>
+              )}
+            </span>
+          </div>
+        </form>
       </div>
-     
     </SettingsSection>
   );
 }
@@ -136,7 +180,8 @@ function DataSettings() {
             <p className="text-sm font-semibold">Saved in this browser</p>
             <p className="text-xs text-muted">
               {projectCount} {projectCount === 1 ? "project" : "projects"} · {taskCount}{" "}
-              {taskCount === 1 ? "task" : "tasks"}. Kept after refresh and restart.
+              {taskCount === 1 ? "task" : "tasks"}. Kept after refresh and restart, and shared
+              by all your open Taskly tabs.
             </p>
           </div>
         </div>

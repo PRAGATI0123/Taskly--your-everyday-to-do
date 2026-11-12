@@ -16,12 +16,17 @@ import { SettingsSection } from "./SettingsSection";
 /** The project's name and description. */
 export function GeneralSettings({ project, canManage }: { project: Project; canManage: boolean }) {
   const updateProject = useTasklyStore((state) => state.updateProject);
-  const [name, setName] = useState(project.name);
-  const [description, setDescription] = useState(project.description);
+  // Only the text you have TYPED is kept here ("draft"). Until you type, the
+  // boxes show the saved values, so a rename made somewhere else (the projects
+  // page, another tab) shows up here too instead of an old name.
+  const [draftName, setDraftName] = useState<string | null>(null);
+  const [draftDescription, setDraftDescription] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
   const [descriptionError, setDescriptionError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const name = draftName ?? project.name;
+  const description = draftDescription ?? project.description;
   const changed = name.trim() !== project.name || description.trim() !== project.description;
 
   function handleSubmit(event: FormEvent) {
@@ -34,6 +39,9 @@ export function GeneralSettings({ project, canManage }: { project: Project; canM
 
     const result = updateProject(project.id, { name, description });
     if (!result.ok) return setNameError(result.error);
+    // Saved: go back to showing the saved values.
+    setDraftName(null);
+    setDraftDescription(null);
     setSaved(true);
   }
 
@@ -46,7 +54,7 @@ export function GeneralSettings({ project, canManage }: { project: Project; canM
           disabled={!canManage}
           value={name}
           onChange={(event) => {
-            setName(event.target.value);
+            setDraftName(event.target.value);
             setNameError(null);
             setSaved(false);
           }}
@@ -60,7 +68,7 @@ export function GeneralSettings({ project, canManage }: { project: Project; canM
           placeholder="What is this project about?"
           value={description}
           onChange={(event) => {
-            setDescription(event.target.value);
+            setDraftDescription(event.target.value);
             setDescriptionError(null);
             setSaved(false);
           }}

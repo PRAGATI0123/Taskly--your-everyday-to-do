@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist, Geist_Mono } from "next/font/google";
 import { StoreProvider } from "@/components/layout/StoreProvider";
 import { ThemeScript } from "@/components/layout/ThemeScript";
@@ -20,12 +20,47 @@ const fraunces = Fraunces({
   subsets: ["latin"],
 });
 
+const DESCRIPTION =
+  "Organize projects and move tasks across a drag-and-drop Kanban board. Free, fast, and saved right in your browser.";
+
+/**
+ * The site's full address, needed for share previews. On Vercel it is filled
+ * in automatically; on your own computer it is localhost.
+ */
+const SITE_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Taskly",
+    default: "Taskly — Kanban project management",
     template: "%s · Taskly",
   },
-  description: "A project management app with a drag-and-drop Kanban board.",
+  description: DESCRIPTION,
+  applicationName: "Taskly",
+  keywords: ["kanban", "project management", "task board", "to-do", "productivity"],
+  // What link previews show (the picture comes from opengraph-image.tsx).
+  openGraph: {
+    type: "website",
+    siteName: "Taskly",
+    title: "Taskly — Kanban project management",
+    description: DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Taskly — Kanban project management",
+    description: DESCRIPTION,
+  },
+};
+
+/** Colours the phone's browser bar to match the page (light and dark). */
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf6f0" },
+    { media: "(prefers-color-scheme: dark)", color: "#16100c" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

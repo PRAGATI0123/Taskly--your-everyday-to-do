@@ -70,6 +70,20 @@ describe("projects", () => {
     expect(store().members).toEqual([APP_USER]);
   });
 
+  it("lets the person change their own name", () => {
+    expect(store().updateMyName("  Riya Sharma ").ok).toBe(true);
+    expect(store().members[0]?.name).toBe("Riya Sharma");
+    expect(store().updateMyName("   ")).toEqual({ ok: false, error: "Your name can't be empty." });
+  });
+
+  it("odd ids like 'constructor' are treated as 'not found', not a crash", () => {
+    expect(store().deleteProject("constructor")).toEqual({
+      ok: false,
+      error: "This project no longer exists.",
+    });
+    expect(store().updateTask("toString", { title: "x" }).ok).toBe(false);
+  });
+
   it("never lets the last owner leave", () => {
     const { projectId } = newProject();
     expect(store().setProjectMemberRole(projectId, APP_USER.id, "member")).toEqual({

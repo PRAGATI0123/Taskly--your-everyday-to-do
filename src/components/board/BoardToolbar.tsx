@@ -39,14 +39,23 @@ export function BoardToolbar({
   // The search box keeps its own copy of the text, so typing always feels
   // instant; every change is also written into the address.
   const [query, setQuery] = useState(filters.query);
+  // If the address changes some other way (Back button, coming back to the
+  // page), copy the new search text into the box so the two always agree.
+  const [lastAddressQuery, setLastAddressQuery] = useState(filters.query);
+  if (filters.query !== lastAddressQuery) {
+    setLastAddressQuery(filters.query);
+    setQuery(filters.query);
+  }
   const searchRef = useRef<HTMLInputElement>(null);
   const activeCount = countActiveFilters(filters);
 
   // Shortcut: press "/" anywhere on the board to jump to the search box.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      const target = event.target as HTMLElement;
-      const typing = target.closest("input, textarea, select, [contenteditable=true]");
+      const target = event.target;
+      const typing =
+        target instanceof Element &&
+        target.closest("input, textarea, select, [contenteditable=true]");
       if (event.key === "/" && !typing && !event.ctrlKey && !event.metaKey) {
         event.preventDefault();
         searchRef.current?.focus();

@@ -7,11 +7,12 @@
  * array or object every time, React thinks the data changed on every check and
  * redraws forever.
  */
+import { lookup } from "@/lib/lookup";
 import { getMemberRole } from "@/lib/permissions";
 import type { ID, Member, MemberRole, Project, Task } from "@/lib/types";
 import { useTasklyStore } from "./tasklyStore";
 
-/** The person who is logged in, or `null`. */
+/** The person using the app, or `null`. */
 export function useCurrentUser(): Member | null {
   return useTasklyStore(
     (state) => state.members.find((m) => m.id === state.currentUserId) ?? null,
@@ -20,18 +21,18 @@ export function useCurrentUser(): Member | null {
 
 /** One project by id, or `undefined` if it doesn't exist. */
 export function useProject(projectId: ID): Project | undefined {
-  return useTasklyStore((state) => state.projects[projectId]);
+  return useTasklyStore((state) => lookup(state.projects, projectId));
 }
 
 /** One task by id, or `undefined` if it doesn't exist. */
 export function useTask(taskId: ID): Task | undefined {
-  return useTasklyStore((state) => state.tasks[taskId]);
+  return useTasklyStore((state) => lookup(state.tasks, taskId));
 }
 
-/** My role in a project, or `null` if I'm not in it / not logged in. */
+/** My role in a project, or `null` if I'm not in it. */
 export function useMyRole(projectId: ID): MemberRole | null {
   return useTasklyStore((state) => {
-    const project = state.projects[projectId];
+    const project = lookup(state.projects, projectId);
     if (!project || !state.currentUserId) return null;
     return getMemberRole(project, state.currentUserId);
   });
